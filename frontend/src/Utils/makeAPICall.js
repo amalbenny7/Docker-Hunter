@@ -14,7 +14,7 @@ const makeAPICall = async (options) => {
     "Authorization"
   ] = `Bearer ${localStorage.getItem("accessToken")}`;
   try {
-    axios.defaults.baseURL = "https://bug-hunter-k8vw.onrender.com";
+    // axios.defaults.baseURL = "https://bug-hunter-k8vw.onrender.com";
 
     const fetchPro = axios({ ...options });
 
