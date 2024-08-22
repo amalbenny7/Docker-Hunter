@@ -17,15 +17,16 @@ app.use(express.json());
 
 app.use(cors());
 
+app.use("/", express.static(path.join(__dirname, "./public", "dist")));
+
 app.use("/user", user);
 
 app.use("/issue", issueRoutes);
 
-app.get("/", (req, res) => {
-  res.json({ status: 200, message: "API Working" });
-});
+// app.get("/", (req, res) => {
+//   res.json({ status: 200, message: "API Working" });
+// });
 
-app.listen(port, '0.0.0.0', () => {
+app.listen(port, "0.0.0.0", () => {
   console.log(`Server listening on all interfaces at port ${port}`);
 });
-
