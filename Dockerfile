@@ -16,7 +16,8 @@ COPY . .
 
 
 # Move the built frontend files to the backend public directory
-RUN mv frontend/dist backend/public
+
+RUN cp frontend/dist/* backend/public
 
 # Set the working directory to backend and expose the port
 WORKDIR /app/backend

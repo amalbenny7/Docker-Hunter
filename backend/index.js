@@ -19,15 +19,10 @@ app.use(cors());
 
 app.use(express.static(path.join(__dirname, "./public")));
 
-
 app.use("/user", user);
 
 app.use("/issue", issueRoutes);
 
-// app.get("/", (req, res) => {
-  //   res.json({ status: 200, message: "API Working" });
-  // });
-  
 app.get("*", function (req, res) {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
