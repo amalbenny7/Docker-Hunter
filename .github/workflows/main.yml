@@ -26,13 +26,13 @@ jobs:
         working-directory: frontend
         run: npm run build # This generates the 'build' directory
 
-      - name: Commit and Push Build Artifacts
+       - name: Upload build to AWS EC2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KEY: ${{ secrets.KEY }}
+          SSH_USER: ${{ secrets.USERNAME }}
+          HOST: ${{ secrets.HOST }}
         run: |
-          # Configure Git
-
-          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          echo "$KEY" > private_key.pem
           chmod 600 private_key.pem
           rsync -avz --delete -e "ssh -i private_key.pem -o StrictHostKeyChecking=no" frontend/build/ $SSH_USER@$HOST:/home/ubuntu/Docker-Hunter/frontend/dist
       - name: Push new code to AWS EC2 instance
