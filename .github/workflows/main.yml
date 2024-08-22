@@ -40,4 +40,4 @@ jobs:
           git commit -m "Add build artifacts" || echo "No changes to commit"
 
           # Push changes to the repository
-          git push origin main
+          git push origin master
