@@ -16,48 +16,6 @@ const router = express.Router();
 
 dotenv.config();
 
-// router.post("/signup", Validator("signup"), async (req, res) => {
-//   const { email, password } = req.body;
-
-//   try {
-//     const emailExist = await User.findOne({ email: email });
-//     if (emailExist)
-//       return res
-//         .status(400)
-//         .json({ message: "Email already registerd.", status: false });
-
-//     const salt = await bcrypt.genSalt(10);
-//     const hashedPassword = await bcrypt.hash(password, salt);
-
-//     const newUser = new User({
-//       username: null,
-//       email: email,
-//       password: hashedPassword,
-//     });
-
-//     const user = await newUser.save();
-
-//     const newToken = new Tokens({
-//       userId: user._id,
-//       accessToken: generateToken(user),
-//       refreshToken: generateRereshToken(user),
-//     });
-
-//     const {
-//       _doc: { accessToken, refreshToken, userId },
-//     } = await newToken.save();
-
-//     res.header("Authorization", `Bearer ${accessToken}`).status(201).json({
-//       accessToken,
-//       refreshToken,
-//       userId,
-//       message: "User registerd successfully.",
-//       status: true,
-//     });
-//   } catch (err) {
-//     res.status(500).json({ message: err.message, status: false });
-//   }
-// });
 
 router.post("/signup", Validator("signup"), async (req, res) => {
   const { email, password } = req.body;
@@ -270,6 +228,7 @@ router.put("/addUsername", validateToken, async (req, res) => {
 });
 
 router.post("/checkUsername", validateToken, async (req, res) => {
+  console.log(req.body.username);
   const username = req.body.username;
 
   try {
@@ -289,6 +248,28 @@ router.post("/checkUsername", validateToken, async (req, res) => {
     });
   } catch (err) {
     return res.send(500).json({ message: err.message, status: false });
+  }
+});
+
+router.delete("/delete", validateToken, async (req, res) => {
+  try {
+    const userID = req.user.userId;
+
+    // Delete the user
+    const userResult = await User.findByIdAndDelete(userID);
+    if (!userResult) return res.status(404).json({ message: "User not found" });
+
+    // Delete the associated tokens
+    const tokenResult = await Tokens.deleteMany({ userId: userID });
+    if (tokenResult.deletedCount === 0) {
+      return res.status(404).json({ message: "No tokens found for user" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "User and associated tokens deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
