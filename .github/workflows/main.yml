@@ -38,9 +38,9 @@ jobs:
           cd frontend
           git add .
           git commit -m "Add build artifacts" || echo "No changes to commit"
-
+          
           # Push changes to the repository
-          git push origin master
+          git push origin master -f
       - name: Push new code to AWS EC2 instance
         uses: appleboy/ssh-action@v1.0.3
         with:
