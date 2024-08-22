@@ -9,7 +9,6 @@ COPY frontend/package*.json ./frontend/
 COPY backend/package*.json ./backend/
 
 # Install dependencies for frontend and backend
-RUN cd frontend && npm install
 RUN cd backend && npm install
 
 # Copy the rest of the application code
