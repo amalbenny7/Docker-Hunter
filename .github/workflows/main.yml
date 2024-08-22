@@ -24,9 +24,9 @@ jobs:
 
       - name: Build the React app
         working-directory: frontend
-        run: npm run build # This generates the 'build' directory
+        run: npm run build
 
-       - name: Upload build to AWS EC2
+      - name: Upload build to AWS EC2
         env:
           KEY: ${{ secrets.KEY }}
           SSH_USER: ${{ secrets.USERNAME }}
