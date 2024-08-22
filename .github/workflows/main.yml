@@ -31,16 +31,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Configure Git
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
 
-          # Add and commit build artifacts
-          cd frontend
-          git add .
-          git commit -m "Add build artifacts" || echo "No changes to commit"
-          
-          # Push changes to the repository
-          git push origin master -f
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          rsync -avz --delete -e "ssh -i private_key.pem -o StrictHostKeyChecking=no" frontend/build/ $SSH_USER@$HOST:/home/ubuntu/Docker-Hunter/frontend/dist
       - name: Push new code to AWS EC2 instance
         uses: appleboy/ssh-action@v1.0.3
         with:
