@@ -15,8 +15,6 @@ RUN cd backend && npm install
 # Copy the rest of the application code
 COPY . .
 
-# Build the frontend
-RUN cd frontend && npx browserslist@latest --update-db && npm run build
 
 # Move the built frontend files to the backend public directory
 RUN mv frontend/dist backend/public
