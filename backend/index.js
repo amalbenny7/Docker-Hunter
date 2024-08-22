@@ -4,7 +4,7 @@ const connectToDb = require("./config/db");
 const dotenv = require("dotenv");
 const user = require("./routes/user");
 const issueRoutes = require("./routes/issue");
-
+const path = require("path");
 dotenv.config();
 
 const app = express();
