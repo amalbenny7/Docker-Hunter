@@ -34,7 +34,7 @@ jobs:
         run: |
           echo "$KEY" > private_key.pem
           chmod 600 private_key.pem
-          rsync -avz --delete -e "ssh -i private_key.pem -o StrictHostKeyChecking=no" frontend/build/ $SSH_USER@$HOST:/home/ubuntu/Docker-Hunter/frontend/dist
+          rsync -avz --delete -e "ssh -i private_key.pem -o StrictHostKeyChecking=no" frontend/dist/ $SSH_USER@$HOST:/home/ubuntu/Docker-Hunter/frontend/dist
       - name: Push new code to AWS EC2 instance
         uses: appleboy/ssh-action@v1.0.3
         with:
