@@ -3,7 +3,7 @@ name: Build and Commit Frontend
 on:
   push:
     branches:
-      - main  # Adjust to your default branch
+      - master  # Adjust to your default branch
 
 jobs:
   build-and-commit:
