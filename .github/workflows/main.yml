@@ -3,38 +3,41 @@ name: Build and Commit Frontend
 on:
   push:
     branches:
-      - main  # Adjust to your default branch
+      - main # Adjust to your default branch
 
 jobs:
   build-and-commit:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'  # Specify your Node.js version
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18" # Specify your Node.js version
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm install
 
-    - name: Build the React app
-      run: npm run build  # This generates the 'build' directory
+      - name: Build the React app
+        working-directory: frontend
+        run: npm run build # This generates the 'build' directory
 
-    - name: Commit and Push Build Artifacts
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        # Configure Git
-        git config user.name "GitHub Actions"
-        git config user.email "actions@github.com"
-        
-        # Add and commit build artifacts
-        git add build/
-        git commit -m "Add build artifacts" || echo "No changes to commit"
+      - name: Commit and Push Build Artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Configure Git
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
 
-        # Push changes to the repository
-        git push origin main
+          # Add and commit build artifacts
+          cd frontend
+          git add .
+          git commit -m "Add build artifacts" || echo "No changes to commit"
+
+          # Push changes to the repository
+          git push origin main
