@@ -21,9 +21,7 @@ app.use(express.json());
 
 app.use(cors());
 
-app.get("*", (req,res) => {
-  res.sendFile(path.join(__dirname,"../frontend","dist"))
-})
+
 
 app.use("/API/user", user);
 
@@ -32,6 +30,10 @@ app.use("/API/issue", issueRoutes);
 app.get("/API", (req, res) => {
   res.json({ status: 200, message: "API Working" });
 });
+
+app.get("*", (req,res) => {
+  res.sendFile(path.join(__dirname,"../frontend","dist"))
+})
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server is up and running at port ${port}`);
