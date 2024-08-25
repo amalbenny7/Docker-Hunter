@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const validateToken = require("../middlewares/ValidateToken");
 const Comment = require("../model/Comment");
 const User = require("../model/User");
+const Counter = require('../model/Counter')
 
 router.post("/init-project", async (req, res) => {
   try {
@@ -23,100 +24,20 @@ router.post("/init-project", async (req, res) => {
   }
 });
 
-// Create a new issue
-// router.post("/create", validateToken, async (req, res) => {
-//   try {
-//     // Validation
-//     const { summary, description, userId } = req.body;
-//     const projectId = req.body.projectId || "65abd8785665c26bcadf3a91";
 
-//     // Check for required fields
-//     if (!summary || !description || !userId) {
-//       return res
-//         .status(400)
-//         .json({ message: "Required fields missing", status: false });
-//     }
-
-//     // Validate data types and lengths (adjust as needed)
-//     if (typeof summary !== "string" || summary.length < 5) {
-//       return res.status(400).json({
-//         message: "Summary must be a string with at least 5 characters",
-//         status: false,
-//       });
-//     }
-//     if (typeof description !== "string" || description.length < 10) {
-//       return res.status(400).json({
-//         message: "Description must be a string with at least 10 characters",
-//         status: false,
-//       });
-//     }
-//     if (
-//       typeof userId !== "string" ||
-//       !mongoose.Types.ObjectId.isValid(userId)
-//     ) {
-//       return res.status(400).json({ message: "Invalid userId", status: false });
-//     }
-
-//     // Generate the issue key
-//     const lastIssue = await Issue.findOne({}, {}, { sort: { issueKey: -1 } });
-//     let issueCount = lastIssue
-//       ? parseInt(lastIssue.issueKey.split("-")[1]) + 1
-//       : 1;
-//     const issueKey = `BUG-${issueCount}`;
-
-//     // Create and save the issue
-//     const issue = new Issue({
-//       summary,
-//       description,
-//       userDetails: userId,
-//       projectDetails: projectId,
-//       issueKey,
-//     });
-//     await issue.save();
-//     res.status(201).json({
-//       ...issue.toObject(),
-//       status: true,
-//       message: "Successfully created new issue",
-//     });
-//   } catch (error) {
-//     if (error instanceof Error && error.name === "ValidationError") {
-//       const errors = Object.values(error.errors).map((err) => err.message);
-//       res
-//         .status(400)
-//         .json({ message: "Validation failed", details: errors, status: false });
-//     } else if (error.name === "CastError") {
-//       res.status(400).json({ message: "Invalid issue ID", status: false });
-//     } else {
-//       console.error(error);
-//       res.status(500).json({ message: "Internal Server Error", status: false });
-//     }
-//   }
-// });
 
 router.post("/create", validateToken, async (req, res) => {
   try {
-    // Validation
     const { summary, description, userId } = req.body;
 
-    // Fetch the first project from the "projects" collection
-    const firstProject = await Project.findOne();
-    if (!firstProject) {
-      return res
-        .status(404)
-        .json({ message: "No projects found", status: false });
-    }
-
-    // Use the ID of the first project
-    const projectId = firstProject._id;
-
-    // Check for required fields
+    // Validate required fields
     if (!summary || !description || !userId) {
       return res
         .status(400)
         .json({ message: "Required fields missing", status: false });
     }
 
-    // Validate data types and lengths (adjust as needed)
+    // Validate data types and lengths
     if (typeof summary !== "string" || summary.length < 5) {
       return res.status(400).json({
         message: "Summary must be a string with at least 5 characters",
@@ -136,22 +57,47 @@ router.post("/create", validateToken, async (req, res) => {
       return res.status(400).json({ message: "Invalid userId", status: false });
     }
 
-    // Generate the issue key
-    const lastIssue = await Issue.findOne({}, {}, { sort: { issueKey: -1 } });
-    let issueCount = lastIssue
-      ? parseInt(lastIssue.issueKey.split("-")[1]) + 1
-      : 1;
-    const issueKey = `BUG-${issueCount}`;
+    // Fetch project and user in parallel
+    const [firstProject, user] = await Promise.all([
+      Project.findOne(),
+      User.findById(userId).select("-password -createdAt -__v"),
+    ]);
+
+    // Check if the project exists
+    if (!firstProject) {
+      return res
+        .status(404)
+        .json({ message: "No projects found", status: false });
+    }
+
+    // Check if the user exists
+    if (!user) {
+      return res.status(404).json({ message: "User not found", status: false });
+    }
+
+    // Atomic issue key generation
+    const counter = await Counter.findOneAndUpdate(
+      { name: "issue_key" },
+      { $inc: { sequence_value: 1 } },
+      { new: true, upsert: true } // Create if not exists
+    );
+
+    if (!counter) {
+      return res.status(500).json({ message: "Failed to generate issue key", status: false });
+    }
+
+    const issueKey = `BUG-${counter.sequence_value}`;
 
     // Create and save the issue
     const issue = new Issue({
       summary,
       description,
       userDetails: userId,
-      projectDetails: projectId,
+      projectDetails: firstProject._id,
       issueKey,
     });
     await issue.save();
+
     res.status(201).json({
       ...issue.toObject(),
       status: true,
@@ -171,6 +117,8 @@ router.post("/create", validateToken, async (req, res) => {
     }
   }
 });
+
+
 
 // Get all issues
 router.get("/", async (req, res) => {
