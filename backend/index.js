@@ -15,7 +15,7 @@ connectToDb();
 const port = process.env.PORT || 8080;
 
 
-app.use(express.static(path.join(__dirname,"../frontend", "dist")))
+app.use(express.static(path.join(__dirname,"public")))
 
 app.use(express.json());
 
@@ -32,7 +32,7 @@ app.get("/API", (req, res) => {
 });
 
 app.get("*", (req,res) => {
-  res.sendFile(path.join(__dirname,"../frontend","dist"))
+  res.sendFile(path.join(__dirname,"public"))
 })
 
 app.listen(port, '0.0.0.0', () => {
