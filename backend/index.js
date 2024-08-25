@@ -32,7 +32,7 @@ app.get("/API", (req, res) => {
 });
 
 app.get("*", (req,res) => {
-  res.sendFile(path.join(__dirname,"public"))
+  res.sendFile(path.join(__dirname,"public",'index.html'))
 })
 
 app.listen(port, '0.0.0.0', () => {
